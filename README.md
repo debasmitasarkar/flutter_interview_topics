@@ -1,5 +1,5 @@
 # Flutter Interview Questions
-This questions are not sorted and listed randomly. These questions were encountered in various interviews.
+These questions are not sorted and listed randomly. These questions were encountered in various interviews.
 I plan to make this a segmented guide with links and answers to questions, so that before any Flutter interview you take a glance or prepare throughly just these topics to ace the interview. Any PRs to make this better are welcome.
 
 1. is Dart multithreaded? If not how does it process Future calls?
