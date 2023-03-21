@@ -249,9 +249,188 @@ In this example, we declare a `screenSize` variable inside the `build` method an
 
 The `build` method is called whenever the widget rebuilds, which means the `screenSize` variable will be redeclared each time. However, the impact on memory is minimal, as the variable simply holds a reference to a `Size` object, which is relatively lightweight. The benefits of improved code readability, maintainability, and ease of access to screen dimensions outweigh the small memory impact.
 
-10. How to check if any widget is placed in widget tree?
-11. Difference between mounted vs past-frame callback
-12. When and why should we use widget binding observer?
+### 10. How to check if any widget is placed in widget tree?
+
+The `mounted` property can be used to check if a `State` object is currently in the widget tree, but it is specific to stateful widgets. When a `State` object is created by the framework, `mounted` is false. After calling `createState`, the framework calls build for the first time, and then it sets `mounted` to true. When the framework removes the `State` object from the tree, it sets `mounted` to false. Consequently, you can use the `mounted` property to check if a stateful widget is currently in the widget tree.
+
+Here's a simple example demonstrating how to use the mounted property to check if a StatefulWidget is present in the widget tree:
+
+```
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: MyHomePage(),
+    );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Mounted Property Example')),
+      body: Center(
+        child: RaisedButton(
+          onPressed: () {
+            // Check if the current StatefulWidget is in the widget tree
+            final isMounted = mounted;
+
+            // Display message based on whether the widget is in the widget tree
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  isMounted ? 'The widget is in the widget tree' : 'The widget is not in the widget tree',
+                ),
+              ),
+            );
+          },
+          child: Text('Check if Widget is in the Widget Tree'),
+        ),
+      ),
+    );
+  }
+}
+```
+
+To check for the presence of ancestor widgets, you can use the `BuildContext` and the `findAncestorWidgetOfExactType` method.
+
+### 11. What's the difference between mounted and post-frame callback ?
+
+mounted and past-frame callback (usually achieved using `WidgetsBinding.instance.addPostFrameCallback`) are different concepts in Flutter, serving different purposes.
+
+**1. mounted:** The `mounted` property is specific to `State` objects of stateful widgets. It is a boolean flag that indicates whether a `State` object is currently in the widget tree. When a `State` object is created by the framework, `mounted` is false. After calling `createState`, the framework calls build for the first time, and then it sets `mounted` to true. When the framework removes the `State` object from the tree, it sets `mounted` to false. You can use the `mounted` property to check if a stateful widget is currently in the widget tree or to prevent calling `setState` when the widget is not in the widget tree.
+
+**2. (Post-Frame Callback)**: A post-frame callback is a function that you can register to be called after the current frame has been rendered. You can use `WidgetsBinding.instance.addPostFrameCallback` to register a callback that will be executed after the current frame completes. This is useful when you want to perform some action after the framework has finished rendering the current frame, for example, showing a `SnackBar` or navigating to a new route immediately after building the widget.
+
+Here's an example of using a post-frame callback:
+
+```
+import 'package:flutter/material.dart';
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(home: MyHomePage());
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Perform an action after the frame has been rendered, e.g., show a SnackBar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Welcome to MyHomePage')),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Post-Frame Callback Example')),
+      body: Center(child: Text('Hello, Flutter!')),
+    );
+  }
+}
+
+```
+
+
+### 12. When and why we should use `WidgetsBindingObserver`?
+
+`WidgetsBindingObserver` is an interface in Flutter that allows you to listen to various application-level events, such as when the app is paused, resumed, or the system informs the app about changes in text scale factors or accessibility features. You might use a `WidgetsBindingObserver` when you want to perform specific actions based on these events.
+
+Here are some common use cases for WidgetsBindingObserver:
+
+- **Managing resources:** If your app uses resources like network connections or sensors that should be released when the app is paused (sent to the background) and reacquired when the app is resumed, you can use `WidgetsBindingObserver` to listen for these lifecycle events and manage resources accordingly.
+
+- **Updating UI based on system changes**: When the system's text scale factor or accessibility features change, you may need to update your app's UI accordingly. `WidgetsBindingObserver` allows you to listen for these changes and perform necessary UI updates.
+
+- **Saving app state**: You can use `WidgetsBindingObserver` to save the app state when it is paused or terminated by the system, ensuring that important data is preserved.
+
+Here's an example of using `WidgetsBindingObserver` to listen for app lifecycle events:
+
+```
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(home: MyHomePage());
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    switch (state) {
+      case AppLifecycleState.inactive:
+        print("App is inactive");
+        break;
+      case AppLifecycleState.paused:
+        print("App is paused");
+        break;
+      case AppLifecycleState.resumed:
+        print("App is resumed");
+        break;
+      case AppLifecycleState.detached:
+        print("App is detached");
+        break;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('WidgetsBindingObserver Example')),
+      body: Center(child: Text('Hello, Flutter!')),
+    );
+  }
+}
+
+```
+
+
 13. What is InheritedWidget? Why/when do we use it? How to pass data through InheritedWidget and access it from other widgets?
 14. AOT vs JIT compiler? In Flutter which compiler gets used in which cases?
 15. AOT vs JIT combiler advantages and disadvantages
