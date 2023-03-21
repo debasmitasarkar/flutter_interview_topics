@@ -431,11 +431,166 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 ```
 
 
-13. What is InheritedWidget? Why/when do we use it? How to pass data through InheritedWidget and access it from other widgets?
-14. AOT vs JIT compiler? In Flutter which compiler gets used in which cases?
-15. AOT vs JIT combiler advantages and disadvantages
-16. BehaviourSubject and RxDart 
+### 13. What is InheritedWidget? Why/when do we use it? How to pass data through InheritedWidget and access it from other widgets?
+
+`InheritedWidget` is a special type of widget in Flutter that can efficiently propagate data down the widget tree. It's designed to allow child widgets to access shared data without having to pass it down explicitly through the constructor of each intermediate widget. `InheritedWidget` is particularly useful when you need to share data across multiple widgets, and passing it down via constructors becomes cumbersome.
+
+Here's a step-by-step guide to create, pass data through, and access an `InheritedWidget`:
+
+1. **Create an InheritedWidget subclass**:
+To create an InheritedWidget, you need to subclass it and implement the updateShouldNotify method. This method is called when the widget is rebuilt, and it determines whether the updated data should be propagated down the widget tree.
+
+```
+class MyInheritedData extends InheritedWidget {
+  final int counter;
+
+  MyInheritedData({Key? key, required this.counter, required Widget child})
+      : super(key: key, child: child);
+
+  @override
+  bool updateShouldNotify(MyInheritedData oldWidget) {
+    return oldWidget.counter != counter;
+  }
+
+  static MyInheritedData of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<MyInheritedData>()!;
+  }
+}
+```
+
+2. **Pass data through the InheritedWidget**:
+To pass data through the `InheritedWidget`, you need to wrap the part of the widget tree that needs access to the data with the InheritedWidget subclass. This makes the data available to all the child widgets.
+
+```
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: MyInheritedData(
+        counter: 42,
+        child: MyHomePage(),
+      ),
+    );
+  }
+}
+```
+In this example, we wrap `MyHomePage` with `MyInheritedData` and set the `counter` value to 42. Now, any child widgets of `MyHomePage` can access the `counter `value.
+
+3. **Access data from the InheritedWidget**:
+
+To access the data from the `InheritedWidget`, you can use the of method we defined in the `MyInheritedData` subclass. This method takes a `BuildContext` and returns the `InheritedWidget` instance, allowing you to access the shared data.
+
+```
+class _MyHomePageState extends State<MyHomePage> {
+  @override
+  Widget build(BuildContext context) {
+    int counter = MyInheritedData.of(context).counter;
+
+    return Scaffold(
+      appBar: AppBar(title: Text('InheritedWidget Example')),
+      body: Center(child: Text('Counter value: $counter')),
+    );
+  }
+}
+```
+
+
+### 14. AOT vs JIT compiler? In Flutter which compiler gets used in which cases?
+
+AOT (Ahead-of-Time) and JIT (Just-in-Time) are two different compilation techniques used in programming languages, including Dart, the language used to develop Flutter applications. They serve different purposes and are used in different scenarios.
+
+**AOT (Ahead-of-Time) Compilation:**
+AOT compilation involves converting the source code into a native machine code or an intermediate bytecode before the program is executed. This process happens during the build stage. When the application is launched, the native code is executed directly by the hardware without any further compilation. AOT has several benefits:
+
+- Faster startup time since the code is already compiled to native code.
+- Better performance and optimizations as the compiler can perform complex and time-consuming optimizations during the build process.
+- Improved security and code obfuscation, making it harder to reverse-engineer the compiled code.
+
+**JIT (Just-in-Time) Compilation:**
+JIT compilation converts the source code into native machine code during the execution of the program, at runtime. This means that the code is compiled and executed in the same process. JIT compilation allows for faster development cycles and enables features like hot reloading in Flutter. However, it may result in slower startup times and increased memory usage due to the runtime compilation overhead. JIT also enables better runtime optimizations, as the compiler can optimize code based on actual usage patterns.
+
+**AOT and JIT Compilers in Flutter:**
+
+In Flutter, both AOT and JIT compilers are used in different scenarios:
+
+- **Development**: During development, Flutter uses the JIT compiler. This enables fast development cycles and hot reloading, allowing developers to see the changes in the code without having to rebuild the entire application. JIT compilation makes it easier to iterate quickly and experiment with the UI and functionality.
+
+- **Production**: In production builds, Flutter uses the AOT compiler. AOT compilation results in faster startup times, better performance, and smaller application sizes. The AOT compiler optimizes the code for the target platform, ensuring that the application runs smoothly on end-user devices.
+
+In conclusion, AOT and JIT compilers serve different purposes in Flutter development. The JIT compiler is used during development to enable fast development cycles and hot reloading, while the AOT compiler is used in production builds to achieve better performance, faster startup times, and smaller application sizes.
+
+
+### 15. Explain AOT vs JIT combiler advantages and disadvantages in Flutter
+
+In Flutter, both AOT (Ahead-of-Time) and JIT (Just-in-Time) compilers serve different purposes and have their own advantages and disadvantages.
+
+**AOT (Ahead-of-Time) Compilation:**
+
+Advantages:
+
+1. **Faster startup time**: Since the code is compiled to native code before execution, the app launches faster as there is no need for runtime compilation.
+2. **Better performance**: The AOT compiler has more time to perform complex optimizations during the build process, resulting in better overall performance.
+3. **Smaller memory footprint**: As the code is compiled ahead of time, there is no need for a runtime compiler, reducing the memory usage of the app.
+4. **Improved security**: AOT compiled code is more difficult to reverse-engineer, providing better code protection.
+
+Disadvantages:
+
+1. **Longer build times**: AOT compilation can increase build times, as the entire codebase must be compiled during the build process.
+2. **Less flexible**: As the code is compiled ahead of time, features like hot reloading are not possible with AOT compilation.
+
+**JIT (Just-in-Time) Compilation:**
+
+Advantages:
+
+1. **Faster development cycle**: JIT compilation enables faster development cycles, as the code is compiled and executed on-the-fly, allowing developers to see changes quickly without rebuilding the entire app.
+2. **Hot reloading**: JIT compilation supports hot reloading, which allows developers to inject new code into the running app and see the results immediately without losing the current app state.
+3. **Runtime optimizations**: JIT compilers can optimize code based on actual usage patterns and runtime information, potentially leading to better-performing code.
+
+Disadvantages:
+
+1. **Slower startup time**: JIT compilation adds overhead during app startup, as the code must be compiled at runtime before execution.
+2. **Increased memory usage**: JIT compilers require additional memory to store the runtime compiler and generated native code.
+3. **Potentially less optimized code**: JIT compilers have limited time to optimize code during runtime, which may result in less optimized code compared to AOT compilers.
+
+
+### 16. What's BehaviourSubject in RxDart ?
+
+`BehaviorSubject` is a type of `StreamController` provided by RxDart, which is an extension of the Dart `Stream` system with additional functionality inspired by ReactiveX (Rx). RxDart adds several new classes and operators to work with streams more efficiently, and `BehaviorSubject` is one of them.
+
+BehaviorSubject is a special kind of stream that has the following characteristics:
+
+1. **Latest value**: A BehaviorSubject remembers the latest value that was emitted by the stream. When a new listener subscribes to the BehaviorSubject, it immediately receives the latest value. This is useful in scenarios where you want new listeners to have access to the current value of the stream without waiting for the next event.
+
+2. **Broadcast stream**: A BehaviorSubject is a broadcast stream, meaning it can have multiple listeners at the same time. When an event is added to the BehaviorSubject, all active listeners receive that event.
+
+3. **Synchronous emission**: BehaviorSubject can emit events synchronously, which means listeners receive events as soon as they are added to the stream. This can be useful for situations where you need to ensure that events are processed in a specific order.
+
+Here's a simple example of using BehaviorSubject in RxDart:
+
+```
+import 'package:rxdart/rxdart.dart';
+
+void main() {
+  final subject = BehaviorSubject<int>();
+
+  // Listener 1
+  subject.stream.listen((value) => print('Listener 1: $value'));
+
+  subject.add(1);
+  subject.add(2);
+
+  // Listener 2
+  subject.stream.listen((value) => print('Listener 2: $value'));
+
+  subject.add(3);
+
+  subject.close();
+}
+```
+ 
 17. Inherited widget vs Provider which is is better and why?
+
+
 18. what is vsync?
 19. what are mixins? Give an example of mixin.
 20. Do mixins solve the diamond problem?
