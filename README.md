@@ -588,13 +588,217 @@ void main() {
 }
 ```
  
-17. Inherited widget vs Provider which is is better and why?
+### 17. Inherited widget vs Provider which is is better and why?
+
+`InheritedWidget` and `Provider` both serve the purpose of sharing data and managing state across different widgets in a Flutter application, but they have different levels of abstraction and features. Choosing between them largely depends on your specific use case, complexity, and requirements.
+
+**InheritedWidget:**
+
+`InheritedWidget` is a built-in Flutter widget designed to propagate data down the widget tree. It allows child widgets to access shared data without having to pass it down explicitly through the constructor of each intermediate widget. It's a simple and efficient way to share data across multiple widgets.
+
+Advantages:
+
+- Built into the Flutter framework, no additional dependencies required.
+- Lightweight and easy to understand for simple use cases.
+
+Disadvantages:
+
+- Lacks advanced features and abstractions provided by Provider.
+- Boilerplate code is required to create custom InheritedWidget subclasses.
+- Less flexible in managing complex state management scenarios.
+
+**Provider:**
+
+Provider is a popular third-party package built on top of `InheritedWidget`. It provides a more advanced, flexible, and easy-to-use approach to state management in Flutter. `Provider` offers different types of providers for various use cases, such as `ChangeNotifierProvider`, `ValueListenableProvider`, and `StreamProvider`.
+
+Advantages:
+
+- Higher-level abstractions, making it easier to manage complex state scenarios.
+- Reduces boilerplate code compared to using InheritedWidget directly.
+- Offers built-in support for common state management patterns like ChangeNotifier.
+- Easily composable, allowing you to use multiple providers together to manage different parts of the application state.
+- Actively maintained and widely used in the Flutter community.
+
+Disadvantages:
+
+- Requires an additional dependency.
+- Might be overkill for very simple use cases.
+
+**Conclusion:**
+
+Choosing between `InheritedWidget` and `Provider` depends on your specific use case and requirements:
+
+If you have a simple use case, limited state management needs, and want to avoid adding an additional dependency, using InheritedWidget might be sufficient.
+If you require a more advanced, flexible, and easy-to-use solution for state management, especially in complex applications, Provider is the better choice. It reduces boilerplate code, offers built-in support for common state management patterns, and is widely used in the Flutter community.
+
+Overall, `Provider` is generally considered to be the better option for most use cases due to its advanced features, flexibility, and ease of use. However, it's essential to evaluate your specific needs and requirements to make the best decision for your application.
+
+### 18. what is vsync?
+
+`vsync`, short for "vertical synchronization", is a term used in computer graphics and animation to refer to the synchronization of frame updates with the display's refresh rate. In the context of Flutter, `vsync` is often used in relation to animations to ensure they are smooth and consistent with the device's screen refresh rate.
+
+When creating animations in Flutter, you typically use the `Ticker` class, which generates a stream of ticks at a regular interval. These ticks are used to update the animation's state and render a new frame. The `vsync` parameter is provided when creating a `TickerProvider` to help synchronize the ticks with the device's screen refresh rate.
+
+By synchronizing the animation updates with the screen refresh rate, `vsync` helps prevent visual artifacts like screen tearing, where parts of the screen update at different times, resulting in a misaligned or torn appearance. It also ensures that the animation does not update too frequently or too rarely, providing a smoother and more visually pleasing experience for the user.
+
+In Flutter, you often encounter `vsync` when working with `AnimationController`:
+
+```
+class _MyAnimatedWidgetState extends State<MyAnimatedWidget> with SingleTickerProviderStateMixin {
+  AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this, // Providing the vsync parameter.
+      duration: const Duration(seconds: 2),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  // ...
+}
+```
 
 
-18. what is vsync?
-19. what are mixins? Give an example of mixin.
-20. Do mixins solve the diamond problem?
-21. What is tree shaking ? Disadvantages of tree shaking
+### 19. What are mixins? Give an real world example and usecase of mixin.
+
+Mixins are a way to reuse a class's code in multiple class hierarchies. In Dart, mixins allow you to add functionality from one class to another without using inheritance. Instead of extending a class, you can include a mixin to incorporate its properties and methods into your own class. Mixins are useful when you want to share code among multiple unrelated classes or when you want to extend the functionality of a class without actually inheriting from it.
+
+A real-world example of a mixin is Flutter's `SingleTickerProviderStateMixin`. This mixin is used to create a single `Ticker` for animations in a `StatefulWidget`. The `Ticker` is responsible for generating a stream of ticks at regular intervals, which are used to drive animations.
+
+Let's consider a use case where you want to create a simple custom animation in a Flutter app:
+
+```
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(title: Text('Mixin Example')),
+        body: Center(child: MyAnimatedWidget()),
+      ),
+    );
+  }
+}
+
+class MyAnimatedWidget extends StatefulWidget {
+  @override
+  _MyAnimatedWidgetState createState() => _MyAnimatedWidgetState();
+}
+
+// Using the SingleTickerProviderStateMixin to include the required functionality.
+class _MyAnimatedWidgetState extends State<MyAnimatedWidget>
+    with SingleTickerProviderStateMixin {
+  AnimationController _animationController;
+  Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    );
+    _animation = Tween<double>(begin: 0, end: 1).animate(_animationController);
+
+    _animationController.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _animation,
+      child: Text(
+        'Hello, Mixin!',
+        style: TextStyle(fontSize: 48),
+      ),
+    );
+  }
+}
+```
+
+In this example, the `_MyAnimatedWidgetState` class uses the `SingleTickerProviderStateMixin` mixin to include the required functionality for creating a single Ticker. The mixin provides the TickerProvider required by the AnimationController and ensures that the animation updates are synchronized with the device's screen refresh rate, resulting in a smooth and consistent animation.
+
+By using the mixin, you can reuse the `SingleTickerProviderStateMixin` functionality in multiple classes without inheritance, allowing you to create flexible and modular code.
+
+### 20. Do mixins solve the diamond problem?
+
+Yes, mixins can help solve the diamond problem in programming languages that support multiple inheritance, such as Dart. The diamond problem arises when a class inherits from two or more classes that have a common ancestor. In such cases, there is ambiguity regarding which ancestor's methods should be used, and in what order they should be called.
+
+Mixins provide a mechanism for code reuse without relying on multiple inheritance, thus avoiding the diamond problem. When a class includes a mixin, it incorporates the mixin's properties and methods directly, rather than inheriting them from another class. This ensures a linear inheritance hierarchy and eliminates the ambiguity that causes the diamond problem.
+
+Here's an example to illustrate how mixins help avoid the diamond problem:
+
+```
+class A {
+  void method() {
+    print('A\'s implementation of method');
+  }
+}
+
+class B extends A {
+  @override
+  void method() {
+    print('B\'s implementation of method');
+  }
+}
+
+class C extends A {
+  @override
+  void method() {
+    print('C\'s implementation of method');
+  }
+}
+
+mixin MixinD on A {
+  @override
+  void method() {
+    super.method();
+    print('MixinD\'s implementation of method');
+  }
+}
+
+class E extends B with MixinD {} // Multiple inheritance with mixin
+
+void main() {
+  E e = E();
+  e.method();
+}
+```
+In this example, class `A` has a method called `method()`. Classes `B` and `C` both extend `A` and override `method()`. `MixinD` is a mixin that overrides `method()` as well, but it requires a superclass of type `A` (indicated by on `A`). Class `E` extends `B` and includes `MixinD`.
+
+When we create an instance of `E` and call `method()`, the output is:
+
+```
+B's implementation of method
+MixinD's implementation of method
+```
+
+As you can see, the mixin allows us to combine the functionality of class `B` and `MixinD` without ambiguity or the diamond problem. The linear order of the method resolution is preserved, ensuring a predictable and consistent behavior.
+
+
+### 21. What is tree shaking ? What are the disadvantages of tree shaking?
+
+
 22. Dependency Injection and it's disadvantages
 23. How to overcome problems in low latency network? what should be taken care in this case?
 24. What are the drawbacks of Singleton network?
