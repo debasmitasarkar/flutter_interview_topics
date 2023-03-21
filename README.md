@@ -156,9 +156,99 @@ The need for obfuscation in Flutter (or any other app development framework) ste
 It's important to note that obfuscation is not a foolproof method for protecting your app, as determined attackers can still reverse-engineer obfuscated code using advanced tools and techniques. However, it does increase the effort required to understand your app's inner workings and can act as an additional layer of security alongside other best practices.
 
 
-7. What is the difference between Const vs final ?
-8. Difference between Dev dependencies vs regular dependency
-9. Should we declare a variable to allocate size from media query in build method? why?
+### 7. What is the difference between Const vs final ?
+
+In Dart, `const` and `final` are both used to create variables with values that cannot be changed after they are assigned. However, there are some differences in their usage and behavior:
+
+**1. const (Compile-Time Constant)**: When you declare a variable as const, it means that the variable is a compile-time constant. The value of a const variable must be determined at compile time, and it cannot be changed after compilation. const variables are implicitly final, meaning they cannot be reassigned.
+
+Example:
+```const int myConstValue = 42;```
+
+Here, `myConstValue` is a compile-time constant with a value of 42, which cannot be changed after compilation.
+
+**2.final (Run-Time Constant)**: When you declare a variable as `final`, it means that the variable is a run-time constant. The value of a `final` variable can be determined at runtime, but it can only be assigned once. After the initial assignment, the value of a `final` variable cannot be changed.
+
+Example:
+
+```final int myFinalValue = calculateValue();```
+
+In this example, myFinalValue is a run-time constant that gets its value from the calculateValue() function. The value of myFinalValue cannot be changed after it has been assigned.
+
+Here's a summary of the differences between const and final:
+
+- const variables must have their values assigned at compile time, while final variables can have their values assigned at runtime.
+- const variables are implicitly final, meaning they cannot be reassigned, while final variables can only be assigned once.
+- const variables can be used in places where the value must be known at compile time, such as when defining the keys of a Map, while final variables can be used in cases where the value can be determined at runtime.
+
+It's important to choose the appropriate keyword based on your requirements. If you need a constant value that must be known at compile time, use const. If you need a constant value that can be determined at runtime, use final.
+
+
+
+### 8. Difference between Dev dependencies vs regular dependency
+
+In a Dart or Flutter project, dependencies are libraries or packages that your project relies on for additional functionality. They are defined in the pubspec.yaml file, and there are two types of dependencies: regular dependencies (also called "dependencies") and development dependencies (or "dev_dependencies"). Here are the main differences between the two:
+
+**1. Regular Dependencies (dependencies)**: These are the packages or libraries that your project needs to run in both development and production environments. They are essential for the core functionality of your app, and they will be included when you build or compile your project for release. Regular dependencies are listed under the dependencies section in the `pubspec.yaml` file.
+
+```
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^0.13.3
+```
+
+In this example, the `http` package is a regular dependency, as it is required for the app's functionality, such as making network requests.
+
+**2. Development Dependencies (dev_dependencies)**: These are the packages or libraries that are only required during the development of your project. They typically include tools for testing, linting, or generating code, among others. Development dependencies are not included when you build or compile your project for release. They are listed under the `dev_dependencies` section in the `pubspec.yaml` file.
+
+```
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  pedantic: ^1.11.0
+```
+In summary, the main differences between regular dependencies and development dependencies are their usage and inclusion in the build process. Regular dependencies are essential for your app's functionality and are included in both development and production builds, while development dependencies are only needed during development and are excluded from production builds.
+
+
+### 9. Should we declare a variable to allocate size from media query in build method? why?
+
+When using MediaQuery in a Flutter app, it's a common practice to declare a variable to store the size obtained from MediaQuery inside the build method. Although declaring the variable inside the build method means it will be redeclared every time the widget rebuilds, the impact on memory is minimal, especially when compared to the benefits it provides in terms of code readability, maintainability, and ease of access to screen dimensions when laying out your widgets.
+
+Here's an example:
+```
+import 'package:flutter/material.dart';
+
+class MyHomePage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // Declare a variable to store the size from MediaQuery
+    final screenSize = MediaQuery.of(context).size;
+
+    return Scaffold(
+      appBar: AppBar(title: Text('Media Query Example')),
+      body: Center(
+        child: Container(
+          width: screenSize.width * 0.8,
+          height: screenSize.height * 0.4,
+          color: Colors.blue,
+          child: Center(
+            child: Text(
+              'Hello, Flutter!',
+              style: TextStyle(fontSize: 24, color: Colors.white),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+```
+
+In this example, we declare a `screenSize` variable inside the `build` method and use it to calculate the dimensions of the `Container` widget. This ensures that the container dimensions are proportional to the screen size, making the layout responsive to different screen sizes and orientations.
+
+The `build` method is called whenever the widget rebuilds, which means the `screenSize` variable will be redeclared each time. However, the impact on memory is minimal, as the variable simply holds a reference to a `Size` object, which is relatively lightweight. The benefits of improved code readability, maintainability, and ease of access to screen dimensions outweigh the small memory impact.
+
 10. How to check if any widget is placed in widget tree?
 11. Difference between mounted vs past-frame callback
 12. When and why should we use widget binding observer?
