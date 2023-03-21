@@ -65,10 +65,98 @@ Message Passing: Since isolates don't share memory, they communicate using messa
 In summary, isolates work in Dart by providing a separate execution environment for parallel computation, with their own memory heap, event loop, and event queue. They communicate with other isolates and the main thread through message passing, enabling concurrent programming without the complexities of shared memory and synchronization.
 
 
-4. How does isolates talks to each other?
-5. What is an event loop? What are micro tasks?
-6. How does obfuscation work in Flutter? What's the need for it?
-7. Const vs final
+### 4. How does isolates talks to each other?
+
+Isolates in Dart communicate with each other through message passing, using SendPort and ReceivePort objects. Since isolates don't share memory, they can't directly access each other's variables or objects. Instead, they send messages containing data between them, allowing them to exchange information or coordinate tasks.
+
+Here's a brief overview of how isolates talk to each other in Dart:
+
+**SendPort and ReceivePort**: To facilitate communication between isolates, each isolate has a SendPort for sending messages and a ReceivePort for receiving messages. When an isolate wants to send a message to another isolate, it uses the target isolate's SendPort. The target isolate, in turn, listens for messages on its ReceivePort.
+
+**Message Passing**: Messages are passed by value, meaning a copy of the data is sent, not a reference to the original data. This ensures that the isolates remain isolated and don't share memory. You can send primitive data types (numbers, strings, booleans) as well as serializable objects between isolates.
+
+**Listening for Messages**: To receive messages from other isolates, you need to listen to the ReceivePort. You can use the listen method on the ReceivePort object and provide a callback function to handle incoming messages. When a message is received, the callback function is executed with the message as an argument.
+
+Here's a simple example demonstrating how two isolates can communicate in Dart:
+
+```
+import 'dart:async';
+import 'dart:isolate';
+
+// Function to be executed in the spawned isolate
+void isolateFunction(SendPort mainIsolateSendPort) {
+  // Create a receive port for the spawned isolate
+  ReceivePort spawnedIsolateReceivePort = ReceivePort();
+
+  // Send the send port of the spawned isolate to the main isolate
+  mainIsolateSendPort.send(spawnedIsolateReceivePort.sendPort);
+
+  // Listen for messages from the main isolate
+  spawnedIsolateReceivePort.listen((message) {
+    print('Spawned isolate received: $message');
+  });
+}
+
+Future<void> main() async {
+  // Create a receive port for the main isolate
+  ReceivePort mainIsolateReceivePort = ReceivePort();
+
+  // Spawn a new isolate and pass the send port of the main isolate
+  await Isolate.spawn(isolateFunction, mainIsolateReceivePort.sendPort);
+
+  // Listen for the send port of the spawned isolate
+  SendPort spawnedIsolateSendPort = await mainIsolateReceivePort.first;
+
+  // Send a message to the spawned isolate
+  spawnedIsolateSendPort.send('Hello from the main isolate!');
+}
+```
+
+### 5. What is an event loop? What are micro tasks?
+
+An event loop is a programming construct that continuously processes and executes tasks or events from a queue in a single-threaded, non-blocking manner. In Dart, both the main isolate and other isolates have their own event loops. The event loop's primary function is to manage the execution of tasks, such as event handling, I/O operations, and timers, allowing asynchronous programming without blocking the thread.
+
+An event loop generally consists of the following components:
+
+**Task Queue**: A queue that stores tasks or events to be processed. When a new task is scheduled, it is added to the task queue.
+
+**Microtask Queue**: A separate queue that holds microtasks, which are small, short-lived tasks that need to be executed before the event loop processes the next task in the task queue. Microtasks are typically generated as a result of scheduling callbacks using `Future` or `Promise` objects.
+
+**Event Loop Cycle**: The event loop repeatedly processes tasks from the task queue and microtasks from the microtask queue. In each iteration of the loop, it first checks if there are any microtasks in the microtask queue. If there are, the event loop processes all the microtasks in the queue before moving on to the task queue. Once the microtask queue is empty, the event loop processes the next task in the task queue.
+
+Microtasks are small, quick tasks that are executed in between the processing of regular tasks in the event loop. They are typically used for operations that need to be completed before the event loop continues processing other tasks. In Dart, you can create a microtask using the `scheduleMicrotask` function, or they can be generated implicitly when you use `async` functions and `Future` objects.
+
+The primary difference between tasks and microtasks is their priority in the event loop. Microtasks have a higher priority and are executed before the event loop moves on to the next task in the task queue. This ensures that microtasks are executed as soon as possible, allowing you to efficiently handle quick, short-lived operations that should be completed before the event loop processes other tasks.
+
+In summary, the event loop is a core concept in asynchronous programming that allows tasks to be executed in a non-blocking manner. Microtasks are short-lived tasks with higher priority than regular tasks, ensuring they are executed quickly before the event loop moves on to other tasks in the queue.
+
+
+### 6. How does obfuscation work in Flutter? What's the need for it?
+
+Obfuscation in Flutter is a process that transforms your app's Dart code into an equivalent, but harder-to-understand version, by replacing meaningful names of classes, methods, and variables with shorter, less descriptive names (such as random characters). This is done to make it more difficult for others to reverse-engineer or analyze your app's source code, protecting your intellectual property and making it harder for potential attackers to identify vulnerabilities.
+
+To enable obfuscation in Flutter, you need to pass certain flags when building your app in release mode. For example, when building an Android app with Flutter, you would use the following command:
+
+```flutter build apk --obfuscate --split-debug-info=<output-directory>```
+
+For an iOS app, the command would be:
+
+```flutter build ios --obfuscate --split-debug-info=<output-directory>```
+
+These flags tell the Dart compiler to obfuscate the code and to store the debugging information separately in the specified output directory. The --split-debug-info flag is necessary because obfuscation makes debugging more difficult, so storing the debug information separately allows you to debug your app if needed while keeping the release binary obfuscated.
+
+The need for obfuscation in Flutter (or any other app development framework) stems from the following reasons:
+
+**Protection of Intellectual Property**: Obfuscation helps protect your proprietary algorithms, business logic, or other trade secrets from being easily understood by competitors or malicious actors who may gain access to your app's compiled code.
+
+**Security**: By making the app's code harder to understand, obfuscation can make it more difficult for attackers to analyze the code, identify vulnerabilities, and develop exploits.
+
+**Tampering Prevention**: Obfuscation can make it harder for attackers to modify your app's code for malicious purposes, such as injecting malware or bypassing licensing checks.
+
+It's important to note that obfuscation is not a foolproof method for protecting your app, as determined attackers can still reverse-engineer obfuscated code using advanced tools and techniques. However, it does increase the effort required to understand your app's inner workings and can act as an additional layer of security alongside other best practices.
+
+
+7. What is the difference between Const vs final ?
 8. Difference between Dev dependencies vs regular dependency
 9. Should we declare a variable to allocate size from media query in build method? why?
 10. How to check if any widget is placed in widget tree?
