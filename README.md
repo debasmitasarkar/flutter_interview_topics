@@ -798,16 +798,151 @@ As you can see, the mixin allows us to combine the functionality of class `B` an
 
 ### 21. What is tree shaking ? What are the disadvantages of tree shaking?
 
+**Tree shaking** is an optimization technique used in software development, particularly in the process of building and bundling web applications and modern frameworks like Flutter. The main purpose of tree shaking is to remove unused or dead code from the final build, resulting in smaller, more efficient bundles.
 
-22. Dependency Injection and it's disadvantages
-23. How to overcome problems in low latency network? what should be taken care in this case?
-24. What are the drawbacks of Singleton network?
-25. SendPort.send() vs Isolate.exit() , what's the difference?
+Tree shaking works by analyzing the dependency graph and determining which parts of the code are actually used by the application. By doing this, it eliminates the portions of the code that are not being used or called, effectively reducing the overall size of the application and improving its performance.
+
+Despite its benefits, tree shaking has some disadvantages:
+
+1. **Build time**: Tree shaking can increase the build time because it requires the build system to analyze the entire dependency graph to identify unused code.
+
+2. **False positives**: It's possible that the tree shaking algorithm may mistakenly remove code that is actually being used, especially in cases where the code is invoked dynamically or through reflection. This can lead to runtime errors and unexpected application behavior.
+
+3. **Developer awareness**: To make the most of tree shaking, developers need to write code that is easy for the tree shaking algorithm to analyze. This might involve avoiding certain coding patterns, like dynamic imports or using code splitting effectively, which can be a burden on developers.
+
+4. **Limited to certain languages and tools**: Tree shaking is more effective with languages and tools that have good support for static analysis, like Dart, which Flutter is built on. However, tree shaking might not be as effective with languages that rely heavily on dynamic typing and runtime features.
+
+Overall, tree shaking is an essential technique for optimizing the performance of modern applications, but it's important to consider its limitations and potential pitfalls. By writing code that is easy to analyze and by thoroughly testing the application, developers can ensure that tree shaking works effectively and efficiently.
+
+
+### 22. What is Dependency Injection and explain it's disadvantages
+
+**Dependency Injection (DI)** is a design pattern used in software development to achieve the principle of Inversion of Control (IoC) by decoupling the creation of an object's dependencies from the object itself. It allows objects to receive their dependencies from an external source, rather than creating them internally. This promotes modularity, testability, and maintainability of the code.
+
+Despite its benefits, dependency injection has some disadvantages:
+
+- **Increased complexity**: Introducing dependency injection can make the code more complex, especially in small-scale projects where its benefits may not be as noticeable. Developers must carefully manage dependency relationships, which can lead to more challenging code navigation and understanding.
+
+- **Boilerplate code**: Dependency injection frameworks or containers can add boilerplate code to the project, making it less readable and harder to maintain. However, using lightweight libraries or implementing manual dependency injection can mitigate this issue.
+
+- **Learning curve**: Developers may need to learn a new dependency injection framework, library, or the concept itself, which can be time-consuming and may slow down development initially.
+
+- **Debugging challenges**: Errors related to dependency injection can be harder to debug, especially when using a DI framework or container. It may not be immediately apparent where the issue originates from, as the dependencies are resolved during runtime.
+
+- **Performance overhead**: Dependency injection frameworks may introduce a performance overhead due to reflection or runtime code generation. However, this overhead is typically negligible and can be mitigated by using compile-time code generation or lightweight libraries.
+
+### 23. How to overcome problems in low latency network? what should be taken care in this case?
+
+Low latency networks are crucial for applications that require real-time interactions, such as gaming, video conferencing, and financial trading platforms. To overcome problems in low latency networks and ensure optimal performance, consider the following strategies:
+
+- **Optimize application architecture**: Design your application architecture to minimize the number of network requests and round trips. Use techniques like data compression, caching, and batching of requests to reduce the overall amount of data being transmitted.
+
+- **Content Delivery Network (CDN)**: Utilize a CDN to distribute your content across multiple geographic locations, bringing it closer to the end-users. This reduces the physical distance data has to travel and can significantly decrease latency.
+
+- **Protocol optimization**: Choose or implement network protocols optimized for low latency scenarios, such as QUIC, which is designed to reduce connection establishment time, or HTTP/3, which uses QUIC as a transport layer.
+
+- **Prioritize traffic**: Implement Quality of Service (QoS) mechanisms to prioritize latency-sensitive traffic over less critical data. This can be achieved using traffic shaping or prioritization techniques on routers and switches in the network.
+
+- **Monitor and measure**: Continuously monitor network performance, latency, and other relevant metrics to identify bottlenecks and potential issues. Tools like ping, traceroute, and specialized network monitoring software can help you gain insights into your network's performance.
+
+- **Optimize server infrastructure**: Ensure your server infrastructure is designed for low latency, with sufficient processing power, memory, and network bandwidth. Consider using real-time operating systems (RTOS) or real-time kernel patches for the operating system to prioritize time-sensitive tasks.
+
+- **Load balancing**: Distribute traffic evenly across multiple servers to prevent overloading and reduce the impact of individual server failures on latency. This can be achieved using hardware or software load balancers.
+
+- **Connection management**: Use connection pooling, keep-alive connections, and WebSocket technology to minimize connection setup overhead and maintain persistent connections between clients and servers.
+
+- **Data synchronization**: For distributed systems, carefully design your data synchronization strategies to minimize data transfer and keep the most up-to-date information available as close to the users as possible.
+
+- **Testing and simulation**: Regularly test your application under various network conditions, including high-latency scenarios, to identify potential issues and ensure that your application can handle different network environments gracefully.
+
+### 24. What are the drawbacks of Singleton pattern?
+
+The Singleton pattern is a design pattern that ensures a class has only one instance and provides a global point of access to that instance. While it can be useful in some scenarios, the Singleton pattern has several drawbacks:
+
+- **Global state**: Singletons essentially create global state, which can lead to tight coupling between components and make it difficult to reason about the application's behavior. Global state can also hinder maintainability and increase the likelihood of bugs.
+
+- **Testing difficulties**: Singleton classes can make unit testing more challenging, as they maintain state across test cases. This can lead to tests that are dependent on each other or tests that are harder to write because you need to account for the global state.
+
+- **Concurrency issues**: In multithreaded environments, Singleton instances may require synchronization to prevent multiple threads from creating separate instances. This can introduce complexity and potential performance bottlenecks.
+
+- **Inheritance limitations**: Singletons usually have a private constructor, which means they cannot be subclassed. This limits the potential for code reuse and flexibility in your design.
+
+- **Scalability**: As your application grows, having a single instance of a resource may become a bottleneck. Singletons are generally not designed to be distributed across multiple nodes in a cluster, which could be a problem for applications requiring horizontal scaling.
+
+- **Dependency hiding** : Singleton usage can hide dependencies between classes, making it less apparent which components depend on the Singleton instance. This can lead to problems understanding and maintaining the code.
+
+- **Code inflexibility**: Since Singleton pattern tightly couples the class with its instance, it can make the code less flexible when you want to refactor or extend the functionality.
+
+To mitigate these drawbacks, consider alternatives such as Dependency Injection, which allows for more flexible, testable, and maintainable code. However, if you do choose to use the Singleton pattern, be aware of its limitations and ensure that you carefully manage state and concurrency to minimize potential issues.
+
+### 25. SendPort.send() vs Isolate.exit() , what's the difference?
+
+`SendPort.send()` and `Isolate.exit()` are related to isolates in Dart, but they serve different purposes. Isolates are a concurrency model used in Dart, allowing the execution of code in parallel with other isolates without sharing memory. Each isolate has its own event loop and memory heap, providing true parallelism while avoiding common multithreading issues like race conditions.
+
+1. **SendPort.send()**:
+
+`SendPort.send()` is a method used to send messages between isolates. Since isolates do not share memory, they need a way to communicate with each other. This is done using message passing via `SendPort` and `ReceivePort`.
+A SendPort is used to send messages from one isolate to another. When you want to send a message to another isolate, you call the `send()` method on the `SendPort` associated with the target isolate. The data sent must be a primitive value or a simple object that can be serialized.
+
+```
+// In the main isolate
+void main() {
+  ReceivePort receivePort = ReceivePort();
+  Isolate.spawn(isolateFunction, receivePort.sendPort);
+
+  receivePort.listen((message) {
+    print('Main isolate received: $message');
+  });
+}
+
+// In the spawned isolate
+void isolateFunction(SendPort sendPort) {
+  sendPort.send('Hello from the spawned isolate!');
+}
+```
+
+2. **Isolate.exit()**:
+`Isolate.exit()` is a method used to terminate an isolate. When you call `Isolate.exit()`, the isolate stops executing and its resources are cleaned up. This is useful when an isolate has completed its task and is no longer needed, or when you want to gracefully shut down an isolate due to an error or user request.
+
+```
+import 'dart:async';
+import 'dart:isolate';
+
+void main() async {
+  ReceivePort receivePort = ReceivePort();
+  Isolate spawnedIsolate = await Isolate.spawn(isolateFunction, receivePort.sendPort);
+
+  receivePort.listen((message) {
+    print('Main isolate received: $message');
+  });
+
+  // Simulate some work and then request the spawned isolate to exit.
+  Future.delayed(Duration(seconds: 2), () {
+    spawnedIsolate.kill(priority: Isolate.immediate);
+    print('Main isolate requested spawned isolate to exit');
+  });
+}
+
+void isolateFunction(SendPort sendPort) {
+  sendPort.send('Hello from the spawned isolate!');
+  // Perform some work
+  // After completing the work or due to a request from the main isolate, you can exit the isolate.
+  Isolate.exit();
+}
+```
+
+
+
 30. Immulibility related questions in Flutter
-31. SizedBox vs Container
+
+31. What's the difference between SizedBox vs Container?
+
 32. Should we do Future calls inside build method? If not why?
-33. factory constructor vs const constructor
+
+33. What's the difference between factory constructor vs const constructor?
+
 34. What is BuildContext?
+
 35. How does build method work? behind the scene what happens?
 36. How to ensure security in mobile apps?
 37. What is man in the middle attack? how to prevent that?
