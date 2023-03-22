@@ -902,6 +902,7 @@ void isolateFunction(SendPort sendPort) {
 ```
 
 2. **Isolate.exit()**:
+
 `Isolate.exit()` is a method used to terminate an isolate. When you call `Isolate.exit()`, the isolate stops executing and its resources are cleaned up. This is useful when an isolate has completed its task and is no longer needed, or when you want to gracefully shut down an isolate due to an error or user request.
 
 ```
@@ -933,21 +934,152 @@ void isolateFunction(SendPort sendPort) {
 
 
 
-30. Immulibility related questions in Flutter
+### 26. Immulibility related questions in Flutter
 
-31. What's the difference between SizedBox vs Container?
+In Flutter, immutability plays a significant role in state management and performance optimization. Immutability means that an object's state cannot be changed once it's created. It is especially important when working with widgets, which are the building blocks of a Flutter app's user interface.
 
-32. Should we do Future calls inside build method? If not why?
+Here are some immutability-related questions in Flutter:
 
-33. What's the difference between factory constructor vs const constructor?
+1. **Why are widgets immutable in Flutter?**
 
-34. What is BuildContext?
+Widgets in Flutter are immutable to improve performance and simplify the process of rebuilding the widget tree. When a widget's properties are immutable, Flutter can efficiently determine whether a widget needs to be redrawn when its parent changes. This allows Flutter to avoid unnecessary rendering and optimize the rendering process.
 
-35. How does build method work? behind the scene what happens?
-36. How to ensure security in mobile apps?
-37. What is man in the middle attack? how to prevent that?
+2. **What is the difference between StatelessWidget and StatefulWidget?**
+
+StatelessWidget is an immutable widget that describes part of the user interface, which depends only on its configuration, provided through its constructor. Since StatelessWidget is immutable, it cannot hold mutable state. It is rebuilt whenever its parent changes.
+
+StatefulWidget, on the other hand, can hold mutable state. It consists of two separate classes: the StatefulWidget itself, which remains immutable, and a separate mutable State object. When the mutable state changes, the framework rebuilds the widget with the updated state.
+
+3. **How does immutability affect state management in Flutter?**
+
+Immutability encourages a unidirectional data flow, making state management more predictable and easier to reason about. Popular state management solutions like Redux, BLoC, and Provider leverage immutability to ensure that the state is updated in a controlled and consistent manner.
+
+4. **How do you create immutable classes in Dart?**
+
+To create an immutable class in Dart, you can use the final keyword for class properties, and assign them values through the class constructor:
+
+```
+class ImmutablePerson {
+  final String name;
+  final int age;
+
+  const ImmutablePerson(this.name, this.age);
+}
+```
+
+### 27. What's the difference between SizedBox vs Container?
+
+The main difference between `SizedBox` and `Container` is their purpose and feature set. `SizedBox` is a simple widget used for enforcing specific dimensions or creating spacing, and it has a `const` constructor when not providing a child. On the other hand, `Container` is a more versatile and feature-rich widget that allows for additional properties like `padding`, `margin`, `decoration`, and `alignment`, but it does not have a `const` constructor.
 
 
+### 28. Should we do Future calls inside build method? If not why?
+
+No, it is not recommended to make Future calls directly inside the build method. There are a few reasons for this:
+
+- **Performance**: The build method can be called frequently due to various factors such as state changes, layout updates, or theme changes. Placing a Future call directly inside the build method can result in the same asynchronous operation being called multiple times, leading to unnecessary network requests, resource usage, or other side effects.
+
+- **State management**: The build method should be focused on rendering the UI based on the current state, without causing side effects or modifying the state itself. Making Future calls inside the build method goes against this principle, as it involves executing side effects and potentially altering the application's state.
+
+- **Readability**: Mixing UI rendering code with asynchronous operations in the build method can lead to code that is harder to read, understand, and maintain. Separating UI rendering and asynchronous calls makes the code more organized and easier to reason about.
+
+29. What's the difference between factory constructor vs const constructor?
+
+factory and const constructors are two different types of constructors in Dart that serve distinct purposes:
+
+- **factory constructor**:
+
+A factory constructor is used when you want to control the instantiation process of a class. Instead of always creating a new instance of the class, a factory constructor can return an existing instance or create a new instance based on certain conditions. This can be useful for implementing patterns like singleton, object pooling, or returning instances of derived classes.
+With a `factory` constructor, you can't access the `this` keyword, and you must return an instance of the class (either a new or an existing one).
+
+Here's an example of a factory constructor for a simple singleton implementation:
+```
+class Singleton {
+  static Singleton _instance;
+
+  factory Singleton() {
+    if (_instance == null) {
+      _instance = Singleton._internal();
+    }
+    return _instance;
+  }
+
+  Singleton._internal();
+}
+```
+- **const constructor**:
+
+A `const` constructor is used when you want to create a compile-time constant object. When you use a `const` constructor, you can instantiate an object using the const keyword, and the object will be created during compilation, not at runtime. This can lead to performance improvements, as the object is only created once and shared across the entire application.
+
+To use a `const` constructor, all the instance variables of the class must be `final`, and the constructor must initialize them using constant expressions.
+
+Here's an example of a const constructor:
+
+```
+class ImmutablePoint {
+  final int x;
+  final int y;
+
+  const ImmutablePoint(this.x, this.y);
+}
+
+// Instantiate a constant object using the const constructor
+const point = ImmutablePoint(3, 4);
+```
+
+
+### 30. What is BuildContext?
+
+`BuildContext` is a crucial concept in Flutter that represents a reference to the location of a widget within the widget tree. Each widget has its own BuildContext, which becomes the parent BuildContext for the widgets it creates. The BuildContext serves several purposes:
+
+- **Widget tree navigation**: BuildContext allows you to navigate the widget tree, find ancestor or descendant widgets, or retrieve data from ancestor widgets. This is particularly useful when working with InheritedWidget, Theme, or other widgets that provide data or configuration through the widget tree.
+
+- **Managing state**: BuildContext plays an essential role in managing state in Flutter. When working with stateful widgets or state management libraries like Provider or BLoC, the BuildContext is often used to access or update the state.
+
+- **Accessing media query, theme, and localization**: BuildContext can be used to access the current MediaQueryData, ThemeData, or Localizations for the widget tree. This allows you to adapt your app's UI based on screen size, platform, or localization settings.
+
+In short, `BuildContext` is an essential concept in Flutter that represents the location of a widget in the widget tree. It allows you to navigate the tree, manage state, and access various contextual data, such as media query, theme, or localization information. When working with Flutter, understanding and using the BuildContext is crucial for building efficient and adaptable applications.
+
+### 31. How does build method work? behind the scene what happens?
+
+The `build` method is a integral part of the Flutter framework, responsible for constructing the widget tree that represents the UI of your application. The build method is called by the framework whenever it needs to render or re-render a widget.
+
+Here's what happens behind the scenes when the build method is called:
+
+1. **Scheduling a rebuild**: When the state of a widget changes, the framework marks the widget as "dirty" and schedules a rebuild. This can be triggered by calling setState in a StatefulWidget, by an animation, or by some external event like a user interaction.
+
+2. **Calling build methods**: During the rebuild process, the framework traverses the dirty widgets and calls their build methods. These build methods return new widget instances that describe the updated UI.
+
+3. **Creating Element objects**: For each widget returned by the build methods, the framework creates or updates an associated Element object. The Element objects are responsible for managing the lifecycle of the widgets and their underlying render objects.
+
+4. **Creating or updating RenderObject objects**: RenderObject objects are responsible for the actual rendering and layout of the UI. For each Element in the tree, the framework either creates a new RenderObject or updates an existing one based on the properties of the associated widget.
+
+5. **Layout, painting, and compositing**: After the RenderObject tree has been updated, the framework performs layout, painting, and compositing operations to display the updated UI on the screen. Layout involves calculating the size and position of the render objects, painting involves drawing the visuals, and compositing involves combining the visuals into a single image that is displayed on the screen.
+
+6. **Garbage collection**: Once the new UI is displayed, the framework performs garbage collection to clean up unused widget and element objects from the previous build cycle.
+
+
+
+### 32. What is man in the middle attack? how to prevent that?
+
+**A Man-in-the-Middle (MITM) attack** is a type of cybersecurity attack in which an attacker intercepts the communication between two parties, typically a client and a server. The attacker can then eavesdrop, modify, or inject new data into the communication, potentially leading to data theft, loss of privacy, or compromise of the system.
+
+To prevent MITM attacks, you can employ several techniques and best practices:
+
+- **Use HTTPS**: Always use HTTPS (Hypertext Transfer Protocol Secure) instead of HTTP for your websites and services. HTTPS encrypts the communication between the client and the server using SSL/TLS, making it difficult for an attacker to intercept or modify the data.
+
+- **SSL/TLS Certificate Validation**: Ensure that your applications validate the server's SSL/TLS certificate correctly. This prevents attackers from using self-signed or forged certificates to intercept the communication. In mobile applications, you can use certificate pinning to ensure that the app only accepts the specific SSL/TLS certificates you trust.
+
+- **Secure Wi-Fi**: Use strong encryption and authentication methods for Wi-Fi networks, such as WPA2 or WPA3 with strong, unique passwords. This reduces the risk of attackers intercepting the communication within the local network.
+
+- **VPN**: Encourage users to use a Virtual Private Network (VPN) when connecting to public or untrusted networks. A VPN encrypts the communication between the client and the VPN server, adding an extra layer of protection against MITM attacks.
+
+- **Secure DNS**: Implement secure DNS protocols, such as DNS over HTTPS (DoH) or DNS over TLS (DoT), to protect DNS queries from MITM attacks. This prevents attackers from intercepting or manipulating DNS queries to redirect users to malicious websites.
+
+- **Security Awareness**: Educate users about the risks of MITM attacks and the importance of using secure, trusted networks. Inform them about the potential dangers of public Wi-Fi networks and how to recognize suspicious activity or phishing attempts.
+
+- **Keep Software Up-to-Date**: Regularly update your software, libraries, and operating systems to protect against known vulnerabilities that attackers can exploit to perform MITM attacks.
+
+By implementing these security measures and best practices, you can significantly reduce the risk of Man-in-the-Middle attacks and protect the integrity and privacy of the communication between clients and servers.
 
 
 
