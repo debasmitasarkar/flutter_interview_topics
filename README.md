@@ -2,9 +2,9 @@
 These questions are not sorted and listed randomly. Most of these questions were encountered in various interviews.
 I plan to make this a segmented guide with links and answers to questions, so that, before any Flutter interview, you take a glance or prepare throughly just these topics to ace the interview. Any PRs to make this better are welcome.
 
-### 1. is Dart multithreaded? If not how does it process Future calls?`
+### 1. is Dart multithreaded? If not how does it process Future calls?
 
-  Dart, the programming language used in Flutter, is single-threaded, meaning it runs on a single thread of execution by default. However, Dart provides support for   asynchronous programming through the use of Future, async, and await keywords, as well as the Isolate API, which allows you to perform parallel computations.
+  Dart, the programming language used in Flutter, is single-threaded, meaning it runs on a single thread of execution by default. However, Dart provides support for   asynchronous programming through the use of `Future`,`async`, and `await` keywords, as well as the `Isolate` API, which allows you to perform parallel computations.
 
   When you use Future in Dart, you're actually working with asynchronous programming constructs. Futures represent a potential value or an error that will be         available at some point in the future. They allow you to write non-blocking code that can handle time-consuming operations, such as network requests or file I/O,   without freezing the UI.
 
@@ -56,7 +56,7 @@ Here's a step-by-step explanation of how isolates work in Dart:
 
 **Creation**: You create a new isolate using the `Isolate.spawn()` function, passing it a top-level function or a static method as an entry point, along with an initial message, typically a `SendPort` to establish communication between the isolates.
 
-Message Passing: Since isolates don't share memory, they communicate using message passing. To send and receive messages, you use `SendPort` and `ReceivePort` objects. A `SendPort` is used to send messages to a receiving isolate, while a ReceivePort is used to listen for incoming messages. Messages are passed by value, meaning a copy of the data is sent, not a reference to the original data.
+**Message Passing**: Since isolates don't share memory, they communicate using message passing. To send and receive messages, you use `SendPort` and `ReceivePort` objects. A `SendPort` is used to send messages to a receiving isolate, while a ReceivePort is used to listen for incoming messages. Messages are passed by value, meaning a copy of the data is sent, not a reference to the original data.
 
 **Execution**: Each isolate has its own event loop and event queue. When an isolate receives a message, the message is added to the event queue. The event loop processes messages in the queue one by one, executing the associated task or function. The isolate continues processing messages until the event queue is empty or the isolate is terminated.
 
@@ -65,7 +65,7 @@ Message Passing: Since isolates don't share memory, they communicate using messa
 In summary, isolates work in Dart by providing a separate execution environment for parallel computation, with their own memory heap, event loop, and event queue. They communicate with other isolates and the main thread through message passing, enabling concurrent programming without the complexities of shared memory and synchronization.
 
 
-### 4. How does isolates talks to each other?
+### 4. How does isolate talk to each other?
 
 Isolates in Dart communicate with each other through message passing, using SendPort and ReceivePort objects. Since isolates don't share memory, they can't directly access each other's variables or objects. Instead, they send messages containing data between them, allowing them to exchange information or coordinate tasks.
 
