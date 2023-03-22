@@ -285,7 +285,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: RaisedButton(
           onPressed: () {
             // Check if the current StatefulWidget is in the widget tree
-            final isMounted = mounted;
+            final isMounted = context.mounted;
 
             // Display message based on whether the widget is in the widget tree
             ScaffoldMessenger.of(context).showSnackBar(
