@@ -6,8 +6,6 @@ I plan to make this a segmented guide with links and answers to questions, so th
 
   Dart, the programming language used in Flutter, is single-threaded, meaning it runs on a single thread of execution by default. However, Dart provides support for   asynchronous programming through the use of `Future`,`async`, and `await` keywords, as well as the `Isolate` API, which allows you to perform parallel computations.
 
-  `Futures` in dart can be directly compared to `Promises` in java script.
-  
   When you use Future in Dart, you're actually working with asynchronous programming constructs. Futures represent a potential value or an error that will be         available at some point in the future. They allow you to write non-blocking code that can handle time-consuming operations, such as network requests or file I/O,   without freezing the UI.
 
  When you make a Future call, Dart's event loop schedules the operation to run in the background. Once the operation is complete, the event loop processes the        result and either resolves the Future with a value or rejects it with an error. During this time, the main thread can continue executing other tasks.
@@ -213,7 +211,7 @@ dev_dependencies:
 In summary, the main differences between regular dependencies and development dependencies are their usage and inclusion in the build process. Regular dependencies are essential for your app's functionality and are included in both development and production builds, while development dependencies are only needed during development and are excluded from production builds.
 
 
-### 9. Should we declare a variable to allocate size from media query in build method? why? how?
+### 9. Should we declare a variable to allocate size from media query in build method? why?
 
 When using MediaQuery in a Flutter app, it's a common practice to declare a variable to store the size obtained from MediaQuery inside the build method. Although declaring the variable inside the build method means it will be redeclared every time the widget rebuilds, the impact on memory is minimal, especially when compared to the benefits it provides in terms of code readability, maintainability, and ease of access to screen dimensions when laying out your widgets.
 
@@ -254,9 +252,6 @@ The `build` method is called whenever the widget rebuilds, which means the `scre
 ### 10. How to check if any widget is placed in widget tree?
 
 The `mounted` property can be used to check if a `State` object is currently in the widget tree, but it is specific to stateful widgets. When a `State` object is created by the framework, `mounted` is false. After calling `createState`, the framework calls build for the first time, and then it sets `mounted` to true. When the framework removes the `State` object from the tree, it sets `mounted` to false. Consequently, you can use the `mounted` property to check if a stateful widget is currently in the widget tree.
-
-**Note**: With flutter SDK v3.7.5+, `mounted` property is now part of `BuildContext`. 
-source: [https://api.flutter.dev/flutter/widgets/BuildContext/mounted.html](https://api.flutter.dev/flutter/widgets/BuildContext/mounted.html)
 
 Here's a simple example demonstrating how to use the mounted property to check if a StatefulWidget is present in the widget tree:
 
@@ -801,7 +796,7 @@ MixinD's implementation of method
 As you can see, the mixin allows us to combine the functionality of class `B` and `MixinD` without ambiguity or the diamond problem. The linear order of the method resolution is preserved, ensuring a predictable and consistent behavior.
 
 
-### 21. What is tree shaking? What are the disadvantages of tree shaking?
+### 21. What is tree shaking ? What are the disadvantages of tree shaking?
 
 **Tree shaking** is an optimization technique used in software development, particularly in the process of building and bundling web applications and modern frameworks like Flutter. The main purpose of tree shaking is to remove unused or dead code from the final build, resulting in smaller, more efficient bundles.
 
